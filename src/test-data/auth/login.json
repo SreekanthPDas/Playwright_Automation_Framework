@@ -1,0 +1,11 @@
+{
+    "validLogin":{
+        "username": "Admin",
+        "password": "admin123"
+    },
+    "invalidLogin":{
+        "username": "Admin",
+        "password": "admin1234",
+        "expectedErrorMessage": "Invalid credentials"
+    }
+}

@@ -1,0 +1,72 @@
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.pnpm-store/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Allure Reports
+/allure-results/
+/allure-report/
+
+# Test & Debug Logs
+/logs/
+*.trace
+*.har
+debug.log
+
+# Reports
+/reports/
+
+# Coverage
+/coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDEs and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+.eslintcache
+
+# TypeScript
+dist/
+build/
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+.cache/
+
+# OS generated files
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+.env.local
