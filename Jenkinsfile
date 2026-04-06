@@ -27,7 +27,7 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                bat 'npx playwright test'
+                bat "set ENV=${params.ENV} && npx playwright test"
             }
         }
 
