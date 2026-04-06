@@ -1,6 +1,5 @@
 pipeline {
 
-```
 agent any
 
 tools {
@@ -72,6 +71,5 @@ post {
     }
 
 }
-```
 
 }
