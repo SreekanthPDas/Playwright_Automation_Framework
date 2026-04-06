@@ -1,54 +1,77 @@
 pipeline {
-    agent any
 
-    tools {
-        nodejs "NodeJS" 
-    }
+```
+agent any
 
-    stages {
+tools {
+    nodejs "NodeJS"
+}
 
-        stage('Checkout Code') {
-            steps {
-                git branch: 'main', url: 'https://github.com/SreekanthPDas/Playwright_Automation_Framework.git'
-            }
-        }
+parameters {
+    choice(
+        name: 'ENV',
+        choices: ['dev', 'qa', 'stage'],
+        description: 'Select Environment to run tests'
+    )
+}
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
-        }
+environment {
+    ENV = "${params.ENV}"
+}
 
-        stage('Install Playwright Browsers') {
-            steps {
-                bat 'npx playwright install'
-            }
-        }
+stages {
 
-        stage('Run Tests') {
-            steps {
-                bat "set ENV=${params.ENV} && npx playwright test"
-            }
-        }
-
-    }
-
-    post {
-
-        always {
-            allure([
-                includeProperties: false,
-                jdk: '',
-                results: [[path: 'allure-results']]
-            ])
-        }
-
-        success {
-            echo 'Tests Passed!'
-        }
-
-        failure {
-            echo 'Tests Failed!'
+    stage('Checkout Code') {
+        steps {
+            git branch: 'main', url: 'https://github.com/SreekanthPDas/Playwright_Automation_Framework.git'
         }
     }
+
+    stage('Install Dependencies') {
+        steps {
+            bat 'npm install'
+        }
+    }
+
+    stage('Install Playwright Browsers') {
+        steps {
+            bat 'npx playwright install'
+        }
+    }
+
+    stage('Debug Environment') {
+        steps {
+            bat 'echo Running tests in ENV=%ENV%'
+        }
+    }
+
+    stage('Run Tests') {
+        steps {
+            bat 'npx playwright test'
+        }
+    }
+
+}
+
+post {
+
+    always {
+        allure([
+            includeProperties: false,
+            jdk: '',
+            results: [[path: 'allure-results']]
+        ])
+    }
+
+    success {
+        echo 'Tests Passed!'
+    }
+
+    failure {
+        echo 'Tests Failed!'
+    }
+
+}
+```
+
 }
