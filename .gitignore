@@ -37,7 +37,7 @@ debug.log
 
 # Environment
 .env
-.env.*
+.env.local*
 !.env.example
 
 # IDEs and OS
