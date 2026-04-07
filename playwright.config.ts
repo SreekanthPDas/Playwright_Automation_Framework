@@ -6,7 +6,7 @@ import path from 'path';
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-const envName = process.env.ENV || 'qa';
+const envName = process.env.ENV;
 const envPath = path.resolve(__dirname, `.env.${envName}`);
 console.log(`Loading env file: ${envPath} (ENV=${envName})`);
 dotenv.config({ path: envPath, override: true });

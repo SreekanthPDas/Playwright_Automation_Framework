@@ -9,7 +9,7 @@ tools {
 parameters {
     choice(
         name: 'ENV',
-        choices: ['qa', 'preprod'],
+        choices: ['QA', 'PREPROD'],
         description: 'Select Environment to run tests'
     )
 }
@@ -48,7 +48,7 @@ stages {
     steps {
 
         script {
-
+            def envName = params.ENV.toUpperCase()
             def baseUrl = "${params.ENV}_BASE_URL"
             def username = "${params.ENV}_USERNAME"
             def password = "${params.ENV}_PASSWORD"
