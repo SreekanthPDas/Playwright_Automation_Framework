@@ -9,7 +9,7 @@ tools {
 parameters {
     choice(
         name: 'ENV',
-        choices: ['dev', 'qa', 'stage'],
+        choices: ['qa', 'preprod'],
         description: 'Select Environment to run tests'
     )
 }
@@ -45,10 +45,28 @@ stages {
     }
 
     stage('Run Tests') {
-        steps {
-            bat 'npx playwright test'
+    steps {
+
+        script {
+
+            def baseUrl = "${params.ENV}_BASE_URL"
+            def username = "${params.ENV}_USERNAME"
+            def password = "${params.ENV}_PASSWORD"
+
+            withCredentials([
+                string(credentialsId: baseUrl, variable: 'BASE_URL'),
+                string(credentialsId: username, variable: 'USERNAME'),
+                string(credentialsId: password, variable: 'PASSWORD')
+            ]) {
+
+                bat 'npx playwright test'
+
+            }
+
         }
+
     }
+}
 
 }
 
