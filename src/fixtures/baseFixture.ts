@@ -14,12 +14,10 @@ export const test = base.extend<TestFixtures>({
     const logger = new TestLogger();
     logger.info("================================");
     logger.info(`Starting test: ${testInfo.title}`);
-    logger.info(`FILE       : ${testInfo.file}`);
-    logger.info(`LINE       : ${testInfo.line}`);
-    
+    logger.info(`File       : ${testInfo.file}`);
+    logger.info(`Line       : ${testInfo.line}`);
     await use(logger);
-    logger.info(`Test status: ${testInfo.status}`);
-    logger.info(`Finished test: ${testInfo.title}`);
+    logger.info(`Finished test: ${testInfo.title} with status: ${testInfo.status}`);
     logger.info(`================================`);
 
     if (testInfo.status !== testInfo.expectedStatus) {
@@ -29,6 +27,6 @@ export const test = base.extend<TestFixtures>({
       fs.writeFileSync(logFile, logger.getLogs());
 
     }
-    logger.info(`TEST END : ${testInfo.title}`);
+    
   }
 });
