@@ -10,6 +10,7 @@ export const runLogger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/run.log" })
+    new winston.transports.File({ filename: "logs/run.log" }),
+    new winston.transports.File({ filename: "logs/error.log", level: "error" })
   ]
 });
