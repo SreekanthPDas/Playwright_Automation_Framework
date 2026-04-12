@@ -24,6 +24,7 @@ jobs:
       run: npx playwright test
       env:
         ENV: QA
+        BASE_URL: https://opensource-demo.orangehrmlive.com
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
