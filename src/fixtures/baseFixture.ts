@@ -2,13 +2,22 @@ import { test as base, Fixtures } from '@playwright/test';
 import fs from 'fs';
 import { TestLogger } from '../utils/logger/testLogger';
 import { runLogger } from '../utils/logger/runLogger';
+import { LoginPage } from '@pages/auth/LoginPage';
+import { DashBoardPage } from '@pages/dashboard/DashBoardPage';
 
 type TestFixtures = {
   logger: TestLogger;
+  loginPage:LoginPage;
+  dashboardPage: DashBoardPage;
 };
 
 export const test = base.extend<TestFixtures>({
-
+  loginPage: async({page}, use)=>{
+    await use(new LoginPage(page));
+  },
+  dashboardPage: async({page}, use)=>{
+    await use(new DashBoardPage(page));
+  },
   logger: async ({}, use, testInfo) => {
 
     const logger = new TestLogger();
