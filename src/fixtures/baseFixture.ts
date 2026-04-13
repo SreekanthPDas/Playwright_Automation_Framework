@@ -12,19 +12,21 @@ export const test = base.extend<TestFixtures>({
   logger: async ({}, use, testInfo) => {
 
     const logger = new TestLogger();
-
+    logger.info("================================");
     logger.info(`Starting test: ${testInfo.title}`);
-
+    logger.info(`File       : ${testInfo.file}`);
+    logger.info(`Line       : ${testInfo.line}`);
     await use(logger);
-
-    logger.info(`Finished test: ${testInfo.title}`);
+    logger.info(`Finished test: ${testInfo.title} with status: ${testInfo.status}`);
+    logger.info(`================================`);
 
     if (testInfo.status !== testInfo.expectedStatus) {
-
-      const logFile = testInfo.outputPath('test.log');
+      logger.error(`TEST FAILED : ${testInfo.title}`);
+      const logFile = testInfo.outputPath('error.log');
 
       fs.writeFileSync(logFile, logger.getLogs());
 
     }
+    
   }
 });
