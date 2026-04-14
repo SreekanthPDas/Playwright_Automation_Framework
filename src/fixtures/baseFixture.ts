@@ -4,11 +4,19 @@ import { TestLogger } from '../utils/logger/testLogger';
 import { runLogger } from '../utils/logger/runLogger';
 import { LoginPage } from '@pages/auth/LoginPage';
 import { DashBoardPage } from '@pages/dashboard/DashBoardPage';
+import { SideMenu } from 'src/components/SideMenu';
+import { AdminTopMenu } from 'src/components/admin/adminTopMenu';
+import { JobDropDown } from 'src/components/admin/jobDropDown';
+import { JobTitlePage } from '@pages/admin/job/jobTitle';
 
 type TestFixtures = {
   logger: TestLogger;
   loginPage:LoginPage;
   dashboardPage: DashBoardPage;
+  sideMenu: SideMenu;
+  adminTopMenu: AdminTopMenu;
+  jobDropDown: JobDropDown;
+  jobTitlePage: JobTitlePage;
 };
 
 export const test = base.extend<TestFixtures>({
@@ -18,6 +26,20 @@ export const test = base.extend<TestFixtures>({
   dashboardPage: async({page}, use)=>{
     await use(new DashBoardPage(page));
   },
+  sideMenu: async({page}, use)=>{
+    await use(new SideMenu(page));
+  },
+  adminTopMenu: async({page}, use)=>{
+    await use(new AdminTopMenu(page));
+  },
+  jobDropDown: async({page}, use)=>{
+    await use(new JobDropDown(page));
+  },
+  jobTitlePage: async({page}, use)=>{
+    await use(new JobTitlePage(page));
+  },
+
+
   logger: async ({}, use, testInfo) => {
 
     const logger = new TestLogger();
@@ -38,4 +60,7 @@ export const test = base.extend<TestFixtures>({
     }
     
   }
+ 
 });
+
+export const expect = test.expect;
