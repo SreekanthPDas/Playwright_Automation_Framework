@@ -1,6 +1,6 @@
 import { test } from '../../fixtures/baseFixture';
 import { expect } from '@playwright/test';
-import { PageManager } from '@pageManager/pageManager';
+import { PageManager } from 'src/pageManager/pageManager';
 import loginData from '@test-data/auth/login.json';
 
 

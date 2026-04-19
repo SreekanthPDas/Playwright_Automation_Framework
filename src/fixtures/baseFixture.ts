@@ -8,37 +8,19 @@ import { SideMenu } from 'src/components/SideMenu';
 import { AdminTopMenu } from 'src/components/admin/adminTopMenu';
 import { JobDropDown } from 'src/components/admin/jobDropDown';
 import { JobTitlePage } from '@pages/admin/job/jobTitle';
+import { addJobTitlePage } from '@pages/admin/job/addJobTitle';
+import { PageManager } from '@pageManager/pageManager';
 
 type TestFixtures = {
   logger: TestLogger;
-  loginPage:LoginPage;
-  dashboardPage: DashBoardPage;
-  sideMenu: SideMenu;
-  adminTopMenu: AdminTopMenu;
-  jobDropDown: JobDropDown;
-  jobTitlePage: JobTitlePage;
+  pageManager: PageManager;
 };
 
 export const test = base.extend<TestFixtures>({
-  loginPage: async({page}, use)=>{
-    await use(new LoginPage(page));
+   pageManager: async ({ page }, use) => {
+    const pageManager = new PageManager(page);
+    await use(pageManager);
   },
-  dashboardPage: async({page}, use)=>{
-    await use(new DashBoardPage(page));
-  },
-  sideMenu: async({page}, use)=>{
-    await use(new SideMenu(page));
-  },
-  adminTopMenu: async({page}, use)=>{
-    await use(new AdminTopMenu(page));
-  },
-  jobDropDown: async({page}, use)=>{
-    await use(new JobDropDown(page));
-  },
-  jobTitlePage: async({page}, use)=>{
-    await use(new JobTitlePage(page));
-  },
-
 
   logger: async ({}, use, testInfo) => {
 
@@ -56,6 +38,7 @@ export const test = base.extend<TestFixtures>({
       const logFile = testInfo.outputPath('error.log');
 
       fs.writeFileSync(logFile, logger.getLogs());
+      
 
     }
     

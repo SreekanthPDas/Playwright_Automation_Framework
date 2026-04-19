@@ -8,7 +8,7 @@ export class JobTitlePage {
     constructor(page:Page){
         this.page = page;
         this.addButton = this.page.getByRole('button', { name: 'Add' });
-        this.jobTitleTable = this.page.getByRole('table', { name: 'Job Titles' });
+        this.jobTitleTable = this.page.getByRole('table');
      }
 
      async verifyJobTitleHeader():Promise<boolean>{
@@ -31,12 +31,29 @@ export class JobTitlePage {
     }
 
     async getJobTitleTableRows():Promise<string[][]>{
-        const rows = await this.jobTitleTable.locator('tbody tr').all();
+        this.jobTitleTable.waitFor({ state: 'visible' });
+        const rows = await this.jobTitleTable.getByRole('row').all();
         const rowData: string[][] = []; 
+        console.log(`Total rows found in the Job Title table: ${rows.length}`);
         for (const row of rows) {
-            const cells = await row.locator('td').allTextContents();
+            const cells = await row.getByRole('cell').allTextContents();
             rowData.push(cells.map(cell => cell.trim()));
         }   
         return rowData;
     }
+
+    async searchJobTitleInTable(jobTitle: string):Promise<boolean>{
+        // Implementation for searching job title in the table
+        console.log(await this.isJobTitleTableVisible());
+        const rows = await this.getJobTitleTableRows();
+        const found = rows.some(row => row.includes(jobTitle));
+        if (!found) {
+            console.log(`Job Title "${jobTitle}" not found in the table.`);
+            return false;
+        }else{  
+            console.log(`Job Title "${jobTitle}" found in the table.`);
+            return found;
+        }
+    }
+
 }
