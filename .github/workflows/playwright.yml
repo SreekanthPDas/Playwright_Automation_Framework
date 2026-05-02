@@ -32,7 +32,13 @@ jobs:
             -e BASE_URL=https://opensource-demo.orangehrmlive.com \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
             -v ${{ github.workspace }}/test-results:/app/test-results \
+            -v ${{ github.workspace }}/allure-results:/app/allure-results \
             playwright-tests
+
+      # ✅ (NEW) Generate Allure report
+      - name: Generate Allure Report
+        run: |
+          npx allure generate allure-results --clean -o allure-report
 
       # 📊 Upload HTML report
       - name: Upload Playwright Report
@@ -50,3 +56,11 @@ jobs:
         with:
           name: test-results
           path: test-results/
+
+      # ✅ (NEW) Upload Allure report
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: allure-report/
