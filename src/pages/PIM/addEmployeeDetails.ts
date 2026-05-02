@@ -72,7 +72,7 @@ export class AddEmployeeDetailsPage {
             const currentMonth = new Date().getMonth() + 1; // Months are zero-based
             await this.page.getByText(currentYear.toString()).first().click();
             await this.page.getByText(year).click();
-            await this.selectMonthOnCalendar(this.page.getByText('April'), 'December');
+            await this.selectMonthOnCalendar(this.page.getByText('May'), 'December');
             await this.page.locator('.oxd-calendar-date').getByText(day).click();
             await this.page.waitForLoadState('networkidle');
         }

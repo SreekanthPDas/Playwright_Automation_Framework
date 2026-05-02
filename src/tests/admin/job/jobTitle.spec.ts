@@ -43,7 +43,8 @@ test.describe('Admin Job Title Tests', () => {
         expect (await jobTitlePage.searchJobTitleInTable('Test Job Title')).toBeFalsy();
         logger.info("Job Title does not exist, proceeding to add a new Job Title - Test Job Title");
         await jobTitlePage.clickAddButton();
-        await addJobTitlePage.saveJobTitle('Test Job Title', 'This is a test job description', 'C:\\Users\\sreek\\Downloads\\#15.txt', 'This is a note for the test job title');
+        const filePath = 'src/test-data/admin/job/15.txt';
+        await addJobTitlePage.saveJobTitle('Test Job Title', 'This is a test job description', filePath, 'This is a note for the test job title');
         logger.info("Added a new Job Title");
         expect (await jobTitlePage.searchJobTitleInTable('Test Job Title')).toBeTruthy();
         logger.info("Verified that the new Job Title is added successfully");

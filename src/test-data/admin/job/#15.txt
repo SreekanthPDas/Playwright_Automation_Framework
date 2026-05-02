@@ -1,0 +1,155 @@
+Started by user admin
+Obtained Jenkinsfile from git https://github.com/SreekanthPDas/Playwright_Automation_Framework.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > C:\Program Files\Git\bin\git.exe rev-parse --resolve-git-dir C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline\.git # timeout=10
+Fetching changes from the remote Git repository
+ > C:\Program Files\Git\bin\git.exe config remote.origin.url https://github.com/SreekanthPDas/Playwright_Automation_Framework.git # timeout=10
+Fetching upstream changes from https://github.com/SreekanthPDas/Playwright_Automation_Framework.git
+ > C:\Program Files\Git\bin\git.exe --version # timeout=10
+ > git --version # 'git version 2.53.0.windows.2'
+ > C:\Program Files\Git\bin\git.exe fetch --tags --force --progress -- https://github.com/SreekanthPDas/Playwright_Automation_Framework.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > C:\Program Files\Git\bin\git.exe rev-parse "refs/remotes/origin/main^{commit}" # timeout=10
+Checking out Revision 7bc7d3c55aabf5632a94e8ae4ef788e9341e8232 (refs/remotes/origin/main)
+ > C:\Program Files\Git\bin\git.exe config core.sparsecheckout # timeout=10
+ > C:\Program Files\Git\bin\git.exe checkout -f 7bc7d3c55aabf5632a94e8ae4ef788e9341e8232 # timeout=10
+Commit message: "Remove tracked .env.*; files now ignored"
+ > C:\Program Files\Git\bin\git.exe rev-list --no-walk 3aa0397f7297049c44af191c0ffc9dac1ee18f9b # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Tool Install)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Checkout Code)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] git
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > C:\Program Files\Git\bin\git.exe rev-parse --resolve-git-dir C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline\.git # timeout=10
+Fetching changes from the remote Git repository
+ > C:\Program Files\Git\bin\git.exe config remote.origin.url https://github.com/SreekanthPDas/Playwright_Automation_Framework.git # timeout=10
+Fetching upstream changes from https://github.com/SreekanthPDas/Playwright_Automation_Framework.git
+ > C:\Program Files\Git\bin\git.exe --version # timeout=10
+ > git --version # 'git version 2.53.0.windows.2'
+ > C:\Program Files\Git\bin\git.exe fetch --tags --force --progress -- https://github.com/SreekanthPDas/Playwright_Automation_Framework.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > C:\Program Files\Git\bin\git.exe rev-parse "refs/remotes/origin/main^{commit}" # timeout=10
+Checking out Revision 7bc7d3c55aabf5632a94e8ae4ef788e9341e8232 (refs/remotes/origin/main)
+ > C:\Program Files\Git\bin\git.exe config core.sparsecheckout # timeout=10
+ > C:\Program Files\Git\bin\git.exe checkout -f 7bc7d3c55aabf5632a94e8ae4ef788e9341e8232 # timeout=10
+ > C:\Program Files\Git\bin\git.exe branch -a -v --no-abbrev # timeout=10
+ > C:\Program Files\Git\bin\git.exe branch -D main # timeout=10
+ > C:\Program Files\Git\bin\git.exe checkout -b main 7bc7d3c55aabf5632a94e8ae4ef788e9341e8232 # timeout=10
+Commit message: "Remove tracked .env.*; files now ignored"
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Install Dependencies)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] bat
+
+C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline>npm install 
+
+up to date, audited 42 packages in 3s
+
+3 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Install Playwright Browsers)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] bat
+
+C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline>npx playwright install 
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Debug Environment)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] bat
+
+C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline>echo Running tests in ENV=qa 
+Running tests in ENV=qa
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Run Tests)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] withCredentials
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] allure
+[Playwright_Automation_Framework_Pipeline] $ C:\Users\sreek\.jenkins\tools\ru.yandex.qatools.allure.jenkins.tools.AllureCommandlineInstallation\Name_Allure_Install_automatically_Version_latest\bin\allure.bat generate C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline\allure-results -c -o C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline\allure-report
+Report successfully generated to C:\Users\sreek\.jenkins\workspace\Playwright_Automation_Framework_Pipeline\allure-report
+Allure report was successfully generated.
+Archiving Allure report via ArtifactManager…
+Allure artifact archived via ArtifactManager.
+Allure report copied to: C:\Users\sreek\.jenkins\jobs\Playwright_Automation_Framework_Pipeline\builds\15\allure-report
+[Pipeline] echo
+Tests Failed!
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: Could not find credentials entry with ID 'qa_BASE_URL'
+Finished: FAILURE
