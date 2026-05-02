@@ -27,6 +27,7 @@ jobs:
       - name: Run Playwright tests in Docker
         run: |
           docker run --name pw-container \
+            -e CI=true \
             -e ENV=QA \
             -e BASE_URL=https://opensource-demo.orangehrmlive.com \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
