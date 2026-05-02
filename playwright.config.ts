@@ -32,17 +32,25 @@ export default defineConfig({
   //Global setup and teardown
   globalSetup: require.resolve('./globalSetup'),
   globalTeardown: require.resolve('./globalTeardown'),
+  /* Timeout settings */
+  timeout: 60 * 1000, // 60 seconds for each test
+  expect: {
+    timeout: 5000 // 5 seconds for each expect assertion
+  },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: process.env.BASE_URL,// || 'https://opensource-demo.orangehrmlive.com',
     /* Run in Headed mode. */
-    headless: false,
+    headless: !!process.env.CI,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     /*Collect screenshots and videos when test fails and retrying the failed test. See https://playwright.dev/docs/video#record-video-only-on-failure */
     screenshot: 'only-on-failure',
-    video: 'retry-with-video',  
+    video: 'retry-with-video',
+    /*Timeout for each action like `click()`, `fill()`, etc. */
+    actionTimeout: 30 * 1000, // 30 seconds  
+    navigationTimeout: 30 * 1000 // 30 seconds
   },
 
   /* Configure projects for major browsers */

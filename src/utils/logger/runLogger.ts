@@ -1,13 +1,17 @@
 import winston from "winston";
 
 export const runLogger = winston.createLogger({
-  level: "debug",
+  level: "info",
   format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.simple()
+    winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+    winston.format.printf(({ timestamp, level, message }) => {
+      return `${timestamp} | ${level.toUpperCase()} | ${message}`;
+    })
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/run.log" })
+    new winston.transports.File({ filename: "logs/run.log" }),
+    new winston.transports.File({ filename: "logs/execution.log", level: "info"}),
+    new winston.transports.File({ filename: "logs/error.log", level: "error" })
   ]
 });
