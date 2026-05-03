@@ -30,7 +30,6 @@ on:
         options:
           - smoke
           - regression
-          - full
 
 permissions:
   contents: read
@@ -54,34 +53,45 @@ jobs:
         run: |
           echo "EVENT: ${{ github.event_name }}"
 
+          ENV=DEV
+          TEST_ARGS=
+
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "ENV=DEV" >> $GITHUB_ENV
-            echo "TEST_ARGS=--grep @smoke" >> $GITHUB_ENV
-            echo "Running SMOKE on DEV"
+            ENV=DEV
+            TEST_ARGS="--grep @smoke"
+            echo "Triggered by PR → Running SMOKE on DEV"
 
           elif [[ "${{ github.event_name }}" == "schedule" ]]; then
-            echo "ENV=SQA1" >> $GITHUB_ENV
-            echo "TEST_ARGS=--grep @regression" >> $GITHUB_ENV
-            echo "Running REGRESSION on SQA1"
+            ENV=SQA1
+            TEST_ARGS=""
+            echo "Triggered by Schedule → Running FULL REGRESSION on SQA1"
 
           elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "ENV=${{ github.event.inputs.environment }}" >> $GITHUB_ENV
+            ENV=${{ github.event.inputs.environment }}
 
             if [[ "${{ github.event.inputs.suite }}" == "smoke" ]]; then
-              echo "TEST_ARGS=--grep @smoke" >> $GITHUB_ENV
-            elif [[ "${{ github.event.inputs.suite }}" == "regression" ]]; then
-              echo "TEST_ARGS=--grep @regression" >> $GITHUB_ENV
+              TEST_ARGS="--grep @smoke"
+              SUITE="SMOKE"
             else
-              echo "TEST_ARGS=" >> $GITHUB_ENV
+              TEST_ARGS=""
+              SUITE="REGRESSION (ALL TESTS)"
             fi
 
-            echo "Manual run → ENV=${{ github.event.inputs.environment }}"
+            echo "🚀 Manual Run Triggered"
+            echo "Selected Environment: $ENV"
+            echo "Selected Suite: $SUITE"
 
           else
-            echo "ENV=DEV" >> $GITHUB_ENV
-            echo "TEST_ARGS=" >> $GITHUB_ENV
-            echo "Push to main → running FULL suite on DEV"
+            ENV=DEV
+            TEST_ARGS=""
+            echo "Triggered by Push → Running FULL suite on DEV"
           fi
+
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "TEST_ARGS=$TEST_ARGS" >> $GITHUB_ENV
+
+          echo "Final ENV=$ENV"
+          echo "Final TEST_ARGS=$TEST_ARGS"
 
       # 🐳 Build Docker image
       - name: Build Docker image
@@ -93,21 +103,38 @@ jobs:
           docker run --name pw-container \
             -e CI=true \
             -e ENV=${{ env.ENV }} \
-            -e TEST_ARGS="${{ env.TEST_ARGS }}" \
+            -e TEST_ARGS=${{ env.TEST_ARGS }} \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
             -v ${{ github.workspace }}/test-results:/app/test-results \
             -v ${{ github.workspace }}/allure-results:/app/allure-results \
             playwright-tests
+
+          docker logs pw-container
 
       # 🔍 Debug outputs
       - name: Debug generated files
         if: always()
         run: |
           echo "==== ENV ===="
-          echo $ENV
+          echo "${{ env.ENV }}"
+
+          echo "==== TEST_ARGS ===="
+          echo "${{ env.TEST_ARGS }}"
 
           echo "==== ALLURE RESULTS ===="
           ls -R allure-results || echo "No allure-results found"
+
+      # 🚨 Fail if no tests executed (prevents blank report)
+      - name: Validate Allure Results
+        if: always()
+        run: |
+          COUNT=$(find allure-results -type f | wc -l)
+          echo "Allure files: $COUNT"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "❌ No test results generated. Check tags or execution."
+            exit 1
+          fi
 
       # 📦 Install Allure CLI
       - name: Install Allure CLI
@@ -118,11 +145,7 @@ jobs:
       - name: Generate Allure Report
         if: always()
         run: |
-          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
-            npx allure generate allure-results --clean -o allure-report
-          else
-            echo "No Allure results found"
-          fi
+          npx allure generate allure-results --clean -o allure-report
 
       # 📊 Upload Allure Report artifact
       - name: Upload Allure Report
@@ -143,7 +166,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: always()
+    if: github.ref == 'refs/heads/main'
 
     permissions:
       pages: write
