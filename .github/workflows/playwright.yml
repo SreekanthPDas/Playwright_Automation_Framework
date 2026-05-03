@@ -5,8 +5,12 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   test:
     timeout-minutes: 60
@@ -24,7 +28,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t playwright-tests .
 
-      # 🧪 Run tests inside Docker
+      # 🧪 Run Playwright tests in Docker
       - name: Run Playwright tests in Docker
         run: |
           docker run --name pw-container \
@@ -36,7 +40,7 @@ jobs:
             -v ${{ github.workspace }}/allure-results:/app/allure-results \
             playwright-tests
 
-      # 🔍 Debug
+      # 🔍 Debug outputs
       - name: Debug generated files
         if: always()
         run: |
@@ -64,7 +68,7 @@ jobs:
             echo "No Allure results found, skipping report generation"
           fi
 
-      # 📊 Upload Playwright HTML report
+      # 📊 Upload Playwright report
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
@@ -74,7 +78,7 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-      # 📁 Upload traces/videos/screenshots
+      # 📁 Upload test results
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
@@ -92,17 +96,23 @@ jobs:
           path: allure-report/
           if-no-files-found: ignore
 
-      # 📦 Prepare Allure report for GitHub Pages
-      - name: Prepare Allure Report for Pages
+      # 📦 Upload artifact for GitHub Pages
+      - name: Upload Pages artifact
         if: always()
-        run: |
-          mkdir -p public
-          cp -r allure-report/* public/
-
-      # 🚀 Deploy to GitHub Pages
-      - name: Deploy to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          path: ./allure-report
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
