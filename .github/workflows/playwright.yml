@@ -103,7 +103,7 @@ jobs:
           docker run --name pw-container \
             -e CI=true \
             -e ENV=${{ env.ENV }} \
-            -e TEST_ARGS=${{ env.TEST_ARGS }} \
+            -e TEST_ARGS="${{ env.TEST_ARGS }}" \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
             -v ${{ github.workspace }}/test-results:/app/test-results \
             -v ${{ github.workspace }}/allure-results:/app/allure-results \
