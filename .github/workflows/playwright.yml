@@ -35,7 +35,7 @@ jobs:
             -v ${{ github.workspace }}/allure-results:/app/allure-results \
             playwright-tests
 
-      # 🔍 Debug (very important for CI visibility)
+      # 🔍 Debug
       - name: Debug generated files
         if: always()
         run: |
@@ -53,7 +53,7 @@ jobs:
         if: always()
         run: npm install --no-save allure-commandline
 
-      # 📊 Generate Allure Report (only if results exist)
+      # 📊 Generate Allure Report
       - name: Generate Allure Report
         if: always()
         run: |
@@ -90,3 +90,18 @@ jobs:
           name: allure-report
           path: allure-report/
           if-no-files-found: ignore
+
+      # 📦 Prepare Allure report for GitHub Pages
+      - name: Prepare Allure Report for Pages
+        if: always()
+        run: |
+          mkdir -p public
+          cp -r allure-report/* public/
+
+      # 🚀 Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
