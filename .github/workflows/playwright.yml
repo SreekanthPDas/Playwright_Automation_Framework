@@ -35,19 +35,43 @@ jobs:
             -v ${{ github.workspace }}/allure-results:/app/allure-results \
             playwright-tests
 
-      # ✅ (NEW) Generate Allure report
-      - name: Generate Allure Report
+      # 🔍 Debug (very important for CI visibility)
+      - name: Debug generated files
+        if: always()
         run: |
-          npx allure generate allure-results --clean -o allure-report
+          echo "==== PLAYWRIGHT REPORT ===="
+          ls -R playwright-report || echo "No playwright-report found"
 
-      # 📊 Upload HTML report
+          echo "==== TEST RESULTS ===="
+          ls -R test-results || echo "No test-results found"
+
+          echo "==== ALLURE RESULTS ===="
+          ls -R allure-results || echo "No allure-results found"
+
+      # 📦 Install Allure CLI
+      - name: Install Allure CLI
+        if: always()
+        run: npm install --no-save allure-commandline
+
+      # 📊 Generate Allure Report (only if results exist)
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          if [ -d "allure-results" ] && [ "$(ls -A allure-results)" ]; then
+            npx allure generate allure-results --clean -o allure-report
+          else
+            echo "No Allure results found, skipping report generation"
+          fi
+
+      # 📊 Upload Playwright HTML report
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+          if-no-files-found: ignore
 
       # 📁 Upload traces/videos/screenshots
       - name: Upload Test Results
@@ -56,11 +80,13 @@ jobs:
         with:
           name: test-results
           path: test-results/
+          if-no-files-found: ignore
 
-      # ✅ (NEW) Upload Allure report
+      # 📊 Upload Allure report
       - name: Upload Allure Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: allure-report
           path: allure-report/
+          if-no-files-found: ignore

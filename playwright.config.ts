@@ -27,7 +27,7 @@ export default defineConfig({
   reporter: [
     ['html', { outputFolder: 'playwright-report', open: 'never' }],
     [process.env.CI ? 'dot' : 'list'],
-    ['allure-playwright']
+    ['allure-playwright', { outputFolder: 'allure-results' }]
   ],
   //Global setup and teardown
   globalSetup: require.resolve('./globalSetup'),
