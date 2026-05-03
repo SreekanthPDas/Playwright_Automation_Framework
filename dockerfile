@@ -17,4 +17,4 @@ COPY . .
 RUN mkdir -p /app/playwright-report /app/test-results /app/allure-results
 
 # Run tests
-CMD ["npx", "playwright", "test"]
+CMD ["sh", "-c", "npx playwright test $TEST_ARGS"]
