@@ -16,7 +16,7 @@ test.describe('Admin Job Title Tests', () => {
         await jobDropDown.clickJobTitlesOption();
     });
 
-    test.skip('Admin Job Title Page should be visible', async ({pageManager}) => {
+    test.skip('@smoke Admin Job Title Page should be visible', async ({pageManager}) => {
         
         const jobTitlePage = await pageManager.getJobTitlePage();
 
@@ -33,7 +33,7 @@ test.describe('Admin Job Title Tests', () => {
         console.log("Search if a Jobtitle is already existing");
         expect (await jobTitlePage.searchJobTitleInTable('Pre-Sales Coordinator')).toBeTruthy();
     });
-    test('Add a new Job Title', async ({pageManager,logger}) => {
+    test('@smoke Add a new Job Title', async ({pageManager,logger}) => {
         
         const jobTitlePage = await pageManager.getJobTitlePage();
         const addJobTitlePage = await pageManager.getAddJobTitlePage();
