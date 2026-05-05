@@ -15,9 +15,10 @@ export class LoginPage{
     }
 
     async navigate() {
-        await this.page.goto("/web/index.php/auth/login");
+        await this.page.goto("/web/index.php/auth/login",{waitUntil: "domcontentloaded",});
         //await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
         await this.page.waitForLoadState('networkidle');
+        console.log("BASE_URL:", process.env.BASE_URL);
     }   
 
     async enterUsername(username: string) {
