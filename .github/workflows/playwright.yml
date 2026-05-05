@@ -159,7 +159,18 @@ jobs:
       - name: Install Allure CLI
         if: always()
         run: npm install --no-save allure-commandline
+      # Check Reports Generated
+      - name: Validate Allure Results (REAL CHECK)
+        run: |
+          echo "==== FILE COUNT ===="
+          find allure-results -type f | wc -l
 
+          echo "==== JSON FILES ===="
+          find allure-results -name "*.json"
+
+          echo "==== DIRECTORY ===="
+          ls -R allure-results
+          
       # 📊 Generate Allure Report
       - name: Generate Allure Report
         if: always()
