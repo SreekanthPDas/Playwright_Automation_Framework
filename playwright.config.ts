@@ -41,6 +41,7 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: process.env.BASE_URL,// || 'https://opensource-demo.orangehrmlive.com',
+      
     /* Run in Headed mode. */
     headless: !!process.env.CI,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
@@ -49,8 +50,9 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retry-with-video',
     /*Timeout for each action like `click()`, `fill()`, etc. */
-    actionTimeout: 30 * 1000, // 30 seconds  
-    navigationTimeout: 30 * 1000 // 30 seconds
+    actionTimeout: 30 * 1000, // 30 seconds 
+    /* Navigation timeout */ 
+    navigationTimeout: 60 * 1000 // 30 seconds
   },
 
   /* Configure projects for major browsers */

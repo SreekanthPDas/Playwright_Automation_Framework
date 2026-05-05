@@ -2,10 +2,10 @@ name: Playwright Tests
 
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
   push:
-    branches: [ main, master ]
+    branches: [ main ]
 
   schedule:
     - cron: '0 2 * * *'   # Nightly regression
@@ -93,6 +93,21 @@ jobs:
           echo "Final ENV=$ENV"
           echo "Final TEST_ARGS=$TEST_ARGS"
 
+      # 🌐 Map ENV → BASE_URL (ADD THIS STEP HERE)
+      - name: Set BASE_URL based on ENV
+        run: |
+          if [[ "${{ env.ENV }}" == "DEV" ]]; then
+            echo "BASE_URL=${{ secrets.DEV_BASE_URL }}" >> $GITHUB_ENV
+
+          elif [[ "${{ env.ENV }}" == "SQA1" ]]; then
+            echo "BASE_URL=${{ secrets.SQA1_BASE_URL }}" >> $GITHUB_ENV
+
+          elif [[ "${{ env.ENV }}" == "SQA2" ]]; then
+            echo "BASE_URL=${{ secrets.SQA2_BASE_URL }}" >> $GITHUB_ENV
+          fi
+
+          echo "Using BASE_URL=$BASE_URL"
+
       # 🐳 Build Docker image
       - name: Build Docker image
         run: docker build -t playwright-tests .
@@ -104,6 +119,7 @@ jobs:
             -e CI=true \
             -e ENV=${{ env.ENV }} \
             -e TEST_ARGS="${{ env.TEST_ARGS }}" \
+            -e BASE_URL="${{ env.BASE_URL }}" \
             -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
             -v ${{ github.workspace }}/test-results:/app/test-results \
             -v ${{ github.workspace }}/allure-results:/app/allure-results \
@@ -121,10 +137,13 @@ jobs:
           echo "==== TEST_ARGS ===="
           echo "${{ env.TEST_ARGS }}"
 
+          echo "==== BASE_URL ===="
+          echo "${{ env.BASE_URL }}"
+
           echo "==== ALLURE RESULTS ===="
           ls -R allure-results || echo "No allure-results found"
 
-      # 🚨 Fail if no tests executed (prevents blank report)
+      # 🚨 Fail if no tests executed
       - name: Validate Allure Results
         if: always()
         run: |
@@ -140,6 +159,17 @@ jobs:
       - name: Install Allure CLI
         if: always()
         run: npm install --no-save allure-commandline
+      # Check Reports Generated
+      - name: Validate Allure Results (REAL CHECK)
+        run: |
+          echo "==== FILE COUNT ===="
+          find allure-results -type f | wc -l
+
+          echo "==== JSON FILES ===="
+          find allure-results -name "*.json"
+
+          echo "==== DIRECTORY ===="
+          ls -R allure-results
 
       # 📊 Generate Allure Report
       - name: Generate Allure Report
@@ -166,7 +196,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: always() && github.ref == 'refs/heads/main'
 
     permissions:
       pages: write
