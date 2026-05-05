@@ -2,10 +2,10 @@ name: Playwright Tests
 
 on:
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
   push:
-    branches: [ main, master ]
+    branches: [ main ]
 
   schedule:
     - cron: '0 2 * * *'   # Nightly regression
@@ -170,7 +170,7 @@ jobs:
 
           echo "==== DIRECTORY ===="
           ls -R allure-results
-          
+
       # 📊 Generate Allure Report
       - name: Generate Allure Report
         if: always()
