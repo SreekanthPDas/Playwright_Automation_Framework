@@ -209,7 +209,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: always() && ((github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'))
 
     permissions:
       pages: write
@@ -217,6 +217,7 @@ jobs:
 
     environment:
       name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Debug deployment trigger
