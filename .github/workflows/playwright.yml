@@ -198,9 +198,9 @@ jobs:
       # 📦 Upload artifact for GitHub Pages
       - name: Upload Pages artifact
         if: always()
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
-          path: ./allure-report
+          path: allure-report
           name: github-pages
 
   deploy:
@@ -218,6 +218,6 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
         with:
           artifact_name: github-pages
