@@ -38,6 +38,9 @@ permissions:
 
 jobs:
   test:
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main' ||
+      github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -206,7 +209,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: always() && github.ref == 'refs/heads/main'
+    if: always() && github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     permissions:
       pages: write
@@ -216,6 +219,12 @@ jobs:
       name: github-pages
 
     steps:
+      - name: Debug deployment trigger
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.sha }}"
+          echo "SHA: ${{ github.sha }}"
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
