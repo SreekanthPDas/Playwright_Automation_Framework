@@ -209,7 +209,7 @@ jobs:
   deploy:
     needs: test
     runs-on: ubuntu-latest
-    if: always() && github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    if: always() && ((github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
 
     permissions:
       pages: write
@@ -223,11 +223,23 @@ jobs:
       - name: Debug deployment trigger
         run: |
           echo "Event: ${{ github.event_name }}"
-          echo "Ref: ${{ github.sha }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
           echo "SHA: ${{ github.sha }}"
+          echo "Repository: ${{ github.repository }}"
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
         with:
           artifact_name: github-pages
+
+      - name: Show deploy failure info
+        if: failure()
+        run: |
+          echo "Deploy job failed."
+          echo "Run details: ${{ github.run_id }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Base ref: ${{ github.event.pull_request.base.ref }}"
+          echo "Check the deploy step logs for the exact Pages error."
