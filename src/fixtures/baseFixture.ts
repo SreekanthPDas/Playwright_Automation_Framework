@@ -2,12 +2,25 @@ import { test as base, Fixtures } from '@playwright/test';
 import fs from 'fs';
 import { TestLogger } from '../utils/logger/testLogger';
 import { runLogger } from '../utils/logger/runLogger';
+import { LoginPage } from '@pages/auth/LoginPage';
+import { DashBoardPage } from '@pages/dashboard/DashBoardPage';
+import { SideMenu } from 'src/components/SideMenu';
+import { AdminTopMenu } from 'src/components/admin/adminTopMenu';
+import { JobDropDown } from 'src/components/admin/jobDropDown';
+import { JobTitlePage } from '@pages/admin/job/jobTitle';
+import { addJobTitlePage } from '@pages/admin/job/addJobTitle';
+import { PageManager } from '@pageManager/pageManager';
 
 type TestFixtures = {
   logger: TestLogger;
+  pageManager: PageManager;
 };
 
 export const test = base.extend<TestFixtures>({
+   pageManager: async ({ page }, use) => {
+    const pageManager = new PageManager(page);
+    await use(pageManager);
+  },
 
   logger: async ({}, use, testInfo) => {
 
@@ -25,8 +38,12 @@ export const test = base.extend<TestFixtures>({
       const logFile = testInfo.outputPath('error.log');
 
       fs.writeFileSync(logFile, logger.getLogs());
+      
 
     }
     
   }
+ 
 });
+
+export const expect = test.expect;

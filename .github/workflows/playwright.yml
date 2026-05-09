@@ -1,39 +1,233 @@
 name: Playwright Tests
+
 on:
-  push:
-    branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
+
+  push:
+    branches: [ main ]
+
+  schedule:
+    - cron: '0 2 * * *'   # Nightly regression
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        default: 'DEV'
+        type: choice
+        options:
+          - DEV
+          - SQA1
+          - SQA2
+
+      suite:
+        description: 'Select Test Suite'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - regression
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   test:
-    timeout-minutes: 60
+    if: |
+      github.event_name == 'push' && github.ref == 'refs/heads/main' ||
+      github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+
     env:
       CI: true
-      ENV: QA
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-      env:
-        ENV: QA
-        BASE_URL: https://opensource-demo.orangehrmlive.com
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
-    - name: Upload Test Results (screenshots/videos/traces)
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-          name: test-results
-          path: test-results/
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 🧠 Decide ENV + SUITE dynamically
+      - name: Set execution parameters
+        run: |
+          echo "EVENT: ${{ github.event_name }}"
+
+          ENV=DEV
+          TEST_ARGS=
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            ENV=DEV
+            TEST_ARGS="--grep @smoke"
+            echo "Triggered by PR → Running SMOKE on DEV"
+
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            ENV=SQA1
+            TEST_ARGS=""
+            echo "Triggered by Schedule → Running FULL REGRESSION on SQA1"
+
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV=${{ github.event.inputs.environment }}
+
+            if [[ "${{ github.event.inputs.suite }}" == "smoke" ]]; then
+              TEST_ARGS="--grep @smoke"
+              SUITE="SMOKE"
+            else
+              TEST_ARGS=""
+              SUITE="REGRESSION (ALL TESTS)"
+            fi
+
+            echo "🚀 Manual Run Triggered"
+            echo "Selected Environment: $ENV"
+            echo "Selected Suite: $SUITE"
+
+          else
+            ENV=DEV
+            TEST_ARGS=""
+            echo "Triggered by Push → Running FULL suite on DEV"
+          fi
+
+          echo "ENV=$ENV" >> $GITHUB_ENV
+          echo "TEST_ARGS=$TEST_ARGS" >> $GITHUB_ENV
+
+          echo "Final ENV=$ENV"
+          echo "Final TEST_ARGS=$TEST_ARGS"
+
+      # 🌐 Map ENV → BASE_URL (ADD THIS STEP HERE)
+      - name: Set BASE_URL based on ENV
+        run: |
+          if [[ "${{ env.ENV }}" == "DEV" ]]; then
+            echo "BASE_URL=${{ secrets.DEV_BASE_URL }}" >> $GITHUB_ENV
+
+          elif [[ "${{ env.ENV }}" == "SQA1" ]]; then
+            echo "BASE_URL=${{ secrets.SQA1_BASE_URL }}" >> $GITHUB_ENV
+
+          elif [[ "${{ env.ENV }}" == "SQA2" ]]; then
+            echo "BASE_URL=${{ secrets.SQA2_BASE_URL }}" >> $GITHUB_ENV
+          fi
+
+          echo "Using BASE_URL=$BASE_URL"
+
+      # 🐳 Build Docker image
+      - name: Build Docker image
+        run: docker build -t playwright-tests .
+
+      # 🧪 Run tests in Docker
+      - name: Run Playwright tests in Docker
+        run: |
+          docker run --name pw-container \
+            -e CI=true \
+            -e ENV=${{ env.ENV }} \
+            -e TEST_ARGS="${{ env.TEST_ARGS }}" \
+            -e BASE_URL="${{ env.BASE_URL }}" \
+            -v ${{ github.workspace }}/playwright-report:/app/playwright-report \
+            -v ${{ github.workspace }}/test-results:/app/test-results \
+            -v ${{ github.workspace }}/allure-results:/app/allure-results \
+            playwright-tests
+
+          docker logs pw-container
+
+      # 🔍 Debug outputs
+      - name: Debug generated files
+        if: always()
+        run: |
+          echo "==== ENV ===="
+          echo "${{ env.ENV }}"
+
+          echo "==== TEST_ARGS ===="
+          echo "${{ env.TEST_ARGS }}"
+
+          echo "==== BASE_URL ===="
+          echo "${{ env.BASE_URL }}"
+
+          echo "==== ALLURE RESULTS ===="
+          ls -R allure-results || echo "No allure-results found"
+
+      # 🚨 Fail if no tests executed
+      - name: Validate Allure Results
+        if: always()
+        run: |
+          COUNT=$(find allure-results -type f | wc -l)
+          echo "Allure files: $COUNT"
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "❌ No test results generated. Check tags or execution."
+            exit 1
+          fi
+
+      # 📦 Install Allure CLI
+      - name: Install Allure CLI
+        if: always()
+        run: npm install --no-save allure-commandline
+      # Check Reports Generated
+      - name: Validate Allure Results (REAL CHECK)
+        run: |
+          echo "==== FILE COUNT ===="
+          find allure-results -type f | wc -l
+
+          echo "==== JSON FILES ===="
+          find allure-results -name "*.json"
+
+          echo "==== DIRECTORY ===="
+          ls -R allure-results
+
+      # 📊 Generate Allure Report
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          npx allure generate allure-results --clean -o allure-report
+
+      # � Validate generated Allure HTML files
+      - name: Validate Allure Report output
+        if: always()
+        run: |
+          echo "==== ALLURE REPORT FILES ===="
+          find allure-report -maxdepth 2 -type f | sort
+          echo "==== INDEX PATH ===="
+          test -f allure-report/index.html && echo "index.html found" || (echo "index.html missing" && exit 1)
+
+      # 📊 Upload Allure Report artifact
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-report
+          path: allure-report/
+          if-no-files-found: ignore
+
+      # 📦 Upload artifact for GitHub Pages
+      - name: Upload Pages artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: allure-report
+          name: github-pages
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always() && ((github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'))
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Debug deployment trigger
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.sha }}"
+          echo "SHA: ${{ github.sha }}"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages
